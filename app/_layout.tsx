@@ -6,11 +6,35 @@ import "react-native-reanimated";
 
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import * as SecureStore from "expo-secure-store";
+import { ClerkProvider, useAuth, ClerkLoaded } from "@clerk/clerk-expo";
 
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
 } from "expo-router";
+
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+// const EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY =
+//   "pk_test_cmlnaHQtemVicmEtODkuY2xlcmsuYWNjb3VudHMuZGV2JA";
+
+const tokenCache = {
+  async getToken(key: string) {
+    try {
+      return SecureStore.getItemAsync(key);
+    } catch (error) {
+      return null;
+    }
+  },
+
+  async saveToken(key: string, value: string) {
+    try {
+      return SecureStore.setItemAsync(key, value);
+    } catch (error) {
+      return;
+    }
+  },
+};
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
@@ -21,8 +45,6 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const router = useRouter();
-
   const [loaded, error] = useFonts({
     "mon-b": require("../assets/fonts/Montserrat-Bold.ttf"),
     "mon-sb": require("../assets/fonts/Montserrat-SemiBold.ttf"),
@@ -44,11 +66,25 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+      <ClerkLoaded>
+        <RootLayoutNav />
+      </ClerkLoaded>
+    </ClerkProvider>
+  );
 }
 
 function RootLayoutNav() {
+  const router = useRouter();
+  const { isLoaded, isSignedIn } = useAuth();
   // const colorScheme = useColorScheme();
+
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.push("/(modals)/login");
+    }
+  }, [isLoaded]);
 
   return (
     <Stack>
@@ -61,6 +97,8 @@ function RootLayoutNav() {
           headerTitleStyle: {
             fontFamily: "mon-sb",
           },
+          animation: "fade",
+          headerTransparent: true,
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
               <Ionicons name="close-outline" size={28} />
