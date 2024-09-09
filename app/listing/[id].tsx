@@ -49,6 +49,10 @@ const Page = () => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
+      headerBackground: () => {
+        <Animated.View style={styles.header}></Animated.View>;
+      },
+
       headerRight: () => {
         <View style={styles.bar}>
           <TouchableOpacity style={styles.roundButton} onPress={shareListing}>
@@ -62,7 +66,7 @@ const Page = () => {
 
       headerLeft: () => {
         <TouchableOpacity style={styles.roundButton} onPress={shareListing}>
-          <Ionicons name="heart-outline" size={22} color={"#000"} />
+          <Ionicons name="chevron-back" size={22} color={"#000"} />
         </TouchableOpacity>;
       },
     });
@@ -86,6 +90,12 @@ const Page = () => {
           ),
         },
       ],
+    };
+  });
+
+  const headerAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: interpolate(scrollOffset.value, [0, IMG_HEIGTH / 1.5], [0, 1]),
     };
   });
 
