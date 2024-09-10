@@ -4,15 +4,17 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
-  TextInput,
+  // TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { defaultStyles } from "@/constants/Styles";
 import Colors from "@/constants/Colors";
+import { TextInput } from "react-native-gesture-handler";
 
 const Page = () => {
   const { signOut, isSignedIn } = useAuth();
@@ -30,8 +32,6 @@ const Page = () => {
     setEmail(user.emailAddresses[0].emailAddress);
   }, [user]);
 
-  const onCaptureImage = async () => {};
-
   const onSaveUser = async () => {
     try {
       if (!firstName || !lastName) return;
@@ -44,6 +44,22 @@ const Page = () => {
       console.log("ERROR UPDATE USER IN THE CONSOLE --- --->: ", error);
     } finally {
       setEdit(false);
+    }
+  };
+
+  const onCaptureImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.75,
+      base64: true,
+    });
+
+    if (!result.canceled) {
+      const base64 = `data:image/png;base64,${result.assets[0].base64}`;
+      user?.setProfileImage({
+        file: base64,
+      });
     }
   };
 
