@@ -16,9 +16,11 @@ import Animated, {
 } from "react-native-reanimated";
 import { defaultStyles } from "@/constants/Styles";
 import { useRouter } from "expo-router";
+import DatePicker from "react-native-modern-datepicker";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import { PLACES } from "@/data/places";
+import { GUESTS_GROUP } from "@/data/guests_group";
 
 const AnimatedTouchableOpacity =
   Animated.createAnimatedComponent(TouchableOpacity);
@@ -28,11 +30,15 @@ const Page = () => {
 
   const [openCard, setOpenCard] = useState(0);
   const [selectedPlace, setselectedPlace] = useState(0);
+  const today = new Date().toISOString().substring(0, 10);
+  const [groups, setGroups] = useState(GUESTS_GROUP);
 
   const onClearAll = () => {
     setselectedPlace(0);
     setOpenCard(0);
+    setGroups(GUESTS_GROUP);
   };
+
   return (
     <BlurView intensity={70} style={styles.container} tint="light">
       {/* <Text>BOOKING POINT YEAH...</Text> */}
@@ -88,10 +94,13 @@ const Page = () => {
                     />
                     <Text
                       style={[
-                        { paddingTop: 6 },
+                        { paddingTop: 6, fontFamily: "mon" },
+                        // selectedPlace === index
+                        //   ? { fontFamily: "mon-sb" }
+                        //   : { fontFamily: "mon" },
                         selectedPlace === index
                           ? { fontFamily: "mon-sb" }
-                          : { fontFamily: "mon" },
+                          : null,
                       ]}
                     >
                       {item.title}{" "}
@@ -105,7 +114,6 @@ const Page = () => {
       </View>
 
       {/* WHEN  */}
-      {/* WHERE  */}
       <View style={styles.card}>
         {openCard != 1 && (
           <AnimatedTouchableOpacity
@@ -120,16 +128,22 @@ const Page = () => {
         )}
 
         {openCard === 1 && (
-          <Animated.View>
+          <>
             <Animated.Text entering={FadeIn} style={styles.cardHeader}>
               When's your trip?
             </Animated.Text>
-          </Animated.View>
+            <Animated.View style={styles.cardBody}>
+              <DatePicker
+                options={{
+                  defaultFont: "mon",
+                }}
+              />
+            </Animated.View>
+          </>
         )}
       </View>
 
       {/* WHO  */}
-      {/* WHERE  */}
       <View style={styles.card}>
         {openCard != 2 && (
           <AnimatedTouchableOpacity
@@ -144,11 +158,93 @@ const Page = () => {
         )}
 
         {openCard === 2 && (
-          <Animated.View>
+          <>
             <Animated.Text entering={FadeIn} style={styles.cardHeader}>
               Who's coming?
             </Animated.Text>
-          </Animated.View>
+            <Animated.View style={styles.cardBody}>
+              {groups.map((item, index) => {
+                return (
+                  <View
+                    key={index}
+                    style={[
+                      styles.guestItem,
+                      index + 1 < GUESTS_GROUP.length
+                        ? styles.itemBorder
+                        : null,
+                    ]}
+                  >
+                    <View>
+                      <Text style={{ fontFamily: "mon-sb", fontSize: 14 }}>
+                        {item.count}{" "}
+                      </Text>
+                      <Text
+                        style={{
+                          fontFamily: "mon",
+                          fontSize: 14,
+                          color: Colors.grey,
+                        }}
+                      >
+                        {item.text}{" "}
+                      </Text>
+                    </View>
+
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        gap: 10,
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <TouchableOpacity
+                        onPress={() => {
+                          const newGroups = [...groups];
+                          // newGroups[index].count--;
+                          newGroups[index].count =
+                            newGroups[index].count > 0
+                              ? newGroups[index].count - 1
+                              : 0;
+                          setGroups(newGroups);
+                        }}
+                      >
+                        <Ionicons
+                          name="remove-circle-outline"
+                          size={26}
+                          color={
+                            groups[index].count > 0 ? Colors.grey : "#cdcdcd"
+                          }
+                        />
+                      </TouchableOpacity>
+                      <Text
+                        style={{
+                          fontFamily: "mon",
+                          fontSize: 16,
+                          minWidth: 18,
+                          textAlign: "center",
+                        }}
+                      >
+                        {item.count}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          const newGroups = [...groups];
+                          newGroups[index].count++;
+                          setGroups(newGroups);
+                        }}
+                      >
+                        <Ionicons
+                          name="add-circle-outline"
+                          size={26}
+                          color={Colors.grey}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                );
+              })}
+            </Animated.View>
+          </>
         )}
       </View>
 
@@ -270,6 +366,16 @@ export const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 10,
+  },
+  guestItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 16,
+  },
+  itemBorder: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: Colors.grey,
   },
 });
 
