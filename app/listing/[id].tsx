@@ -22,7 +22,7 @@ import { defaultStyles } from "@/constants/Styles";
 import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 
-const IMG_HEIGTH = 30;
+const IMG_HEIGTH = 300;
 const { width } = Dimensions.get("window");
 
 const Page = () => {
@@ -56,17 +56,20 @@ const Page = () => {
       headerRight: () => {
         <View style={styles.bar}>
           <TouchableOpacity style={styles.roundButton} onPress={shareListing}>
-            <Ionicons name="share-outline" size={22} color={"#000"} />
+            <Ionicons name="share-outline" size={22} color={Colors.primary} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.roundButton} onPress={shareListing}>
-            <Ionicons name="heart-outline" size={22} color={"#000"} />
+            <Ionicons name="heart-outline" size={22} color={Colors.primary} />
           </TouchableOpacity>
         </View>;
       },
 
       headerLeft: () => {
-        <TouchableOpacity style={styles.roundButton} onPress={shareListing}>
-          <Ionicons name="chevron-back" size={22} color={"#000"} />
+        <TouchableOpacity
+          style={styles.roundButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="chevron-back" size={22} color={Colors.primary} />
         </TouchableOpacity>;
       },
     });
@@ -78,7 +81,7 @@ const Page = () => {
         {
           translateY: interpolate(
             scrollOffset.value,
-            [-IMG_HEIGTH, 0, IMG_HEIGTH],
+            [-IMG_HEIGTH, 0, IMG_HEIGTH, IMG_HEIGTH],
             [-IMG_HEIGTH / 2, 0, IMG_HEIGTH * 0.75]
           ),
         },
@@ -111,6 +114,7 @@ const Page = () => {
         <Animated.Image
           source={{ uri: listing.xl_picture_url }}
           style={[styles.image, imageAnimatedStyle]}
+          resizeMode={"cover"}
         />
 
         <View style={styles.infoContainer}>
@@ -184,6 +188,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+    // marginTop: 100,
   },
   image: {
     height: IMG_HEIGTH,
